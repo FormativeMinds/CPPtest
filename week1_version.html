@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Sikh History Quiz & Facts</title>
+<style>
+  :root {
+    --maroon: #4A1414;
+    --blush: #F2D5D5;
+    --cream: #F5E6C8;
+    --dark: #222222;
+    --green: #2E6F40;
+    --red: #A83232;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: 'Inter', Arial, sans-serif;
+    background: var(--cream);
+    color: var(--dark);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .card {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 18px rgba(0,0,0,0.15);
+    padding: 32px;
+    width: 520px;
+    max-width: 92vw;
+    text-align: center;
+  }
+  h1 {
+    color: var(--maroon);
+    font-size: 1.5rem;
+    margin-top: 0;
+    margin-bottom: 12px;
+  }
+  .header-stats {
+    display: flex;
+    justify-content: space-between;
+    font-weight: bold;
+    color: var(--maroon);
+    margin-bottom: 16px;
+    padding: 0 8px;
+  }
+  #questionBox {
+    background: var(--blush);
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+    color: var(--dark);
+    font-size: 1.05rem;
+    line-height: 1.5;
+  }
+  .options-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .opt-btn {
+    background: var(--maroon);
+    color: white;
+    border: none;
+    padding: 12px;
+    font-size: 0.95rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .opt-btn:hover:not(:disabled) { opacity: 0.9; }
+  .opt-btn:disabled { cursor: default; }
+  .opt-btn.correct { background: var(--green) !important; color: white; }
+  .opt-btn.incorrect { background: var(--red) !important; color: white; }
+  
+  #feedback {
+    min-height: 24px;
+    font-weight: bold;
+    margin-bottom: 12px;
+  }
+  .controls {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+  }
+  .action-btn {
+    background: var(--maroon);
+    color: white;
+    border: none;
+    padding: 10px 18px;
+    font-size: 0.95rem;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+  .action-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  #learnMoreBox {
+    display: none;
+    background: #FAF3E0;
+    border-left: 4px solid var(--maroon);
+    padding: 16px;
+    margin-top: 16px;
+    border-radius: 4px;
+    text-align: left;
+    font-size: 0.95rem;
+    line-height: 1.5;
+  }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <h1>Sikh History Quiz</h1>
+  <div class="header-stats">
+    <div>Score: <span id="score">0</span></div>
+    <div>Time Left: <span id="timer">15</span>s</div>
+  </div>
+  
+  <div id="questionBox">Loading question...</div>
+  
+  <div class="options-grid" id="optionsGrid"></div>
+  <div id="feedback"></div>
+
+  <div class="controls">
+    <button id="learnMoreBtn" class="action-btn" disabled>Learn More</button>
+    <button id="nextBtn" class="action-btn" disabled>Next Question</button>
+  </div>
+
+  <div id="learnMoreBox"></div>
+</div>
+
+<script>
+  // Expanded database sourced from historical accounts of Sikh history
+  const quizData = [
+    {
+      question: "Where was Guru Nanak Dev Ji, the founder of Sikhi, born in 1469?",
+      options: ["Amritsar", "Talwandi", "Anandpur Sahib", "Delhi"],
+      answer: "Talwandi",
+      fact: "Guru Nanak Dev Ji, the founder of Sikhi, was born in 1469 in Talwandi (present-day Nankana Sahib, Pakistan).",
+      detail: "Guru Nanak Dev Ji was born in Talwandi Rai Bhoe, which was later renamed Nankana Sahib in his honor. Today, it is located in the Punjab province of Pakistan and remains a key historical site for Sikhs worldwide."
+    },
+    {
+      question: "How is the Guru Granth Sahib viewed in Sikhi?",
+      options: ["As a historical book", "As a poetry collection", "As the eternal, living Guru", "As a modern commentary"],
+      answer: "As the eternal, living Guru",
+      fact: "The Guru Granth Sahib is treated as the eternal, living Guru of Sikhs and is never considered just a book.",
+      detail: "Guru Gobind Singh Ji conferred eternal Guruship upon the holy scripture in 1708. It contains sacred hymns and teachings from the Sikh Gurus along with saint-poets from various spiritual traditions."
+    },
+    {
+      question: "In what year was the Khalsa formally established on Vaisakhi?",
+      options: ["1469", "1526", "1699", "1708"],
+      answer: "1699",
+      fact: "The Khalsa was formally established by Guru Gobind Singh Ji on Vaisakhi in 1699.",
+      detail: "During the Vaisakhi gathering at Anandpur Sahib in 1699, Guru Gobind Singh Ji created the Khalsa panth, establishing a collective body of committed Sikhs initiated through Amrit Sanchar."
+    },
+    {
+      question: "What do the four entrances of the Golden Temple (Harmandir Sahib) represent?",
+      options: ["Four directions", "Four original Gurus", "Welcome to all backgrounds", "Four royal gates"],
+      answer: "Welcome to all backgrounds",
+      fact: "The Golden Temple (Harmandir Sahib) in Amritsar has four entrances, symbolizing that people of all backgrounds are welcome.",
+      detail: "Harmandir Sahib was designed with doors facing East, West, North, and South to emphasize open community, equality, and hospitality for people of every caste, creed, and background."
+    },
+    {
+      question: "What is 'Langar' in Sikhi?",
+      options: ["A meditative chant", "A free community kitchen", "A warrior martial art", "A ceremonial dress"],
+      answer: "A free community kitchen",
+      fact: "Langar, the practice of a free community kitchen open to all, was started by Guru Nanak Dev Ji and continues at Gurdwaras worldwide today.",
+      detail: "Langar is served to everyone regardless of religion, gender, caste, or background. Everyone sits together on the floor as equals to share a vegetarian meal served through voluntary community service (Sewa)."
+    },
+    {
+      question: "How many human Gurus were there in Sikhi?",
+      options: ["5", "8", "10", "12"],
+      answer: "10",
+      fact: "There were ten human Gurus in Sikhi, starting with Guru Nanak Dev Ji and ending with Guru Gobind Singh Ji.",
+      detail: "The lineage spanned from Guru Nanak Dev Ji (born 1469) through ten human Gurus until 1708, when Guru Gobind Singh Ji bestowed the spiritual Guruship upon the Guru Granth Sahib."
+    },
+    {
+      question: "Which Guru compiled the Adi Granth, the initial scripture, in 1604?",
+      options: ["Guru Nanak Dev Ji", "Guru Angad Dev Ji", "Guru Arjan Dev Ji", "Guru Tegh Bahadur Ji"],
+      answer: "Guru Arjan Dev Ji",
+      fact: "Guru Arjan Dev Ji, the fifth Guru, compiled the Adi Granth in 1604 and installed it in the Harmandir Sahib.",
+      detail: "Guru Arjan Dev Ji gathered the compositions of the previous Gurus along with writings from medieval saints (Bhagats) of various castes and religions, installing the holy volume in Amritsar."
+    },
+    {
+      question: "Which Guru introduced the Gurmukhi script for writing Punjabi?",
+      options: ["Guru Angad Dev Ji", "Guru Amar Das Ji", "Guru Ram Das Ji", "Guru Har Rai Ji"],
+      answer: "Guru Angad Dev Ji",
+      fact: "Guru Angad Dev Ji standardized and introduced the Gurmukhi script.",
+      detail: "The second Guru, Guru Angad Dev Ji, organized the Gurmukhi script to make learning and reading religious texts accessible to common people, bypassing complex elite languages of the era."
+    },
+    {
+      question: "Which Sikh Guru stood for freedom of conscience and was martyred in Delhi in 1675?",
+      options: ["Guru Hargobind Ji", "Guru Har Krishan Ji", "Guru Tegh Bahadur Ji", "Guru Gobind Singh Ji"],
+      answer: "Guru Tegh Bahadur Ji",
+      fact: "Guru Tegh Bahadur Ji, the ninth Guru, gave his life to protect the religious freedom and human rights of others.",
+      detail: "Guru Tegh Bahadur Ji defended the fundamental right of individuals to practice their faith freely without forced conversion, earning him respect as a defender of human dignity."
+    },
+    {
+      question: "What city was founded by Guru Ram Das Ji in 1577?",
+      options: ["Anandpur Sahib", "Amritsar", "Kartarpur", "Goindwal"],
+      answer: "Amritsar",
+      fact: "Amritsar was founded by Guru Ram Das Ji, the fourth Guru, in 1577.",
+      detail: "Originally centered around a holy pool known as Amrit Sarovar ('pool of nectar'), the area developed into the spiritual hub of Sikh tradition and a major trade city."
+    }
+  ];
+
+  let currentQuestionIndex = 0;
+  let score = 0;
+  let timerInterval = null;
+  let timeLeft = 15;
+  let shuffledQuestions = [];
+
+  const questionBox = document.getElementById('questionBox');
+  const optionsGrid = document.getElementById('optionsGrid');
+  const feedback = document.getElementById('feedback');
+  const scoreDisplay = document.getElementById('score');
+  const timerDisplay = document.getElementById('timer');
+  const learnMoreBtn = document.getElementById('learnMoreBtn');
+  const nextBtn = document.getElementById('nextBtn');
+  const learnMoreBox = document.getElementById('learnMoreBox');
+
+  // Utility array shuffler (Fisher-Yates)
+  function shuffleArray(array) {
+    const arr = [...array];
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+
+  function startTimer() {
+    clearInterval(timerInterval);
+    timeLeft = 15;
+    timerDisplay.textContent = timeLeft;
+
+    timerInterval = setInterval(() => {
+      timeLeft--;
+      timerDisplay.textContent = timeLeft;
+
+      if (timeLeft <= 0) {
+        clearInterval(timerInterval);
+        handleTimeout();
+      }
+    }, 1000);
+  }
+
+  function handleTimeout() {
+    const currentData = shuffledQuestions[currentQuestionIndex];
+    const allButtons = optionsGrid.querySelectorAll('.opt-btn');
+    allButtons.forEach(btn => btn.disabled = true);
+
+    feedback.textContent = `⏳ Time's up! The correct answer was: ${currentData.answer}`;
+    feedback.style.color = 'var(--red)';
+
+    allButtons.forEach(btn => {
+      if (btn.textContent === currentData.answer) {
+        btn.classList.add('correct');
+      }
+    });
+
+    learnMoreBtn.disabled = false;
+    nextBtn.disabled = false;
+  }
+
+  function loadQuestion() {
+    clearInterval(timerInterval);
+    
+    // Reset state
+    feedback.textContent = '';
+    learnMoreBox.style.display = 'none';
+    learnMoreBtn.disabled = true;
+    nextBtn.disabled = true;
+    optionsGrid.innerHTML = '';
+
+    const currentData = shuffledQuestions[currentQuestionIndex];
+    questionBox.textContent = currentData.question;
+
+    // Randomize option order
+    const randomizedOptions = shuffleArray(currentData.options);
+
+    randomizedOptions.forEach(option => {
+      const btn = document.createElement('button');
+      btn.className = 'opt-btn';
+      btn.textContent = option;
+      btn.addEventListener('click', () => checkAnswer(option, currentData.answer, btn));
+      optionsGrid.appendChild(btn);
+    });
+
+    startTimer();
+  }
+
+  function checkAnswer(selectedOption, correctAnswer, clickedBtn) {
+    clearInterval(timerInterval);
+
+    const allButtons = optionsGrid.querySelectorAll('.opt-btn');
+    allButtons.forEach(btn => btn.disabled = true);
+
+    if (selectedOption === correctAnswer) {
+      clickedBtn.classList.add('correct');
+      feedback.textContent = '✓ Correct!';
+      feedback.style.color = 'var(--green)';
+      score++;
+      scoreDisplay.textContent = score;
+    } else {
+      clickedBtn.classList.add('incorrect');
+      feedback.textContent = `✗ Incorrect. Correct answer: ${correctAnswer}`;
+      feedback.style.color = 'var(--red)';
+      
+      allButtons.forEach(btn => {
+        if (btn.textContent === correctAnswer) {
+          btn.classList.add('correct');
+        }
+      });
+    }
+
+    learnMoreBtn.disabled = false;
+    nextBtn.disabled = false;
+  }
+
+  learnMoreBtn.addEventListener('click', () => {
+    const currentData = shuffledQuestions[currentQuestionIndex];
+    learnMoreBox.innerHTML = `<strong>Fact:</strong> ${currentData.fact}<br><br><strong>Detail:</strong> ${currentData.detail}`;
+    learnMoreBox.style.display = 'block';
+  });
+
+  nextBtn.addEventListener('click', () => {
+    currentQuestionIndex++;
+    
+    // If all questions answered, reshuffle and start a new round
+    if (currentQuestionIndex >= shuffledQuestions.length) {
+      shuffledQuestions = shuffleArray(quizData);
+      currentQuestionIndex = 0;
+    }
+    
+    loadQuestion();
+  });
+
+  // Initialize
+  shuffledQuestions = shuffleArray(quizData);
+  loadQuestion();
+</script>
+
+</body>
+</html>
